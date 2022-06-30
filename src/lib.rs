@@ -51,6 +51,8 @@ pub async fn btrfs_subvolume_show(path: &Path) -> Result<BtrfsSubvolumeShow, Err
 
     let mut command = Command::new("btrfs");
     command.arg("subvolume").arg("show").arg(path);
+    debug!("Getting BTRFS subvolume info: {command:?}");
+
     let output = command.output().await?;
 
     if !output.status.success() {
