@@ -6,12 +6,15 @@ use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use tokio::process::{Child, Command};
 
-pub async fn btrfs_subvolume_create(path: &Path) -> bool {
+pub async fn btrfs_subvolume_create(path: &Path) -> Result<()> {
     let mut command = Command::new("btrfs");
     command.arg("subvolume").arg("create").arg(path);
     debug!("Creating BTRFS subvolume: {:?}", command);
     let output = command.output().await.unwrap();
-    output.status.success()
+    if !output.status.success() {
+        return Err(anyhow!("Error creating BTRFS subvolume: {output:?}"));
+    }
+    Ok(())
 }
 
 pub async fn btrfs_subvolume_snapshot(path: &Path, snapshot: &Path, readonly: bool) -> Result<()> {
