@@ -27,7 +27,7 @@ pub async fn btrfs_subvolume_snapshot(path: &Path, snapshot: &Path, readonly: bo
     debug!("Snapshotting BTRFS volume: {:?}", command);
     let output = command.output().await.unwrap();
     if !output.status.success() {
-        return Err(anyhow!("Error deleting subvolume: {:?}", output));
+        return Err(anyhow!("Error snapshotting subvolume: {:?}", output));
     }
     Ok(())
 }
