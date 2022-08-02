@@ -6,6 +6,9 @@ use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use tokio::process::{Child, Command};
 
+/// Create a new, empty BTRFS subvolume at `path`.
+///
+/// This assumes that the parent directory of `path` is a BTRFS volume.
 pub async fn btrfs_subvolume_create(path: &Path) -> Result<()> {
     let mut command = Command::new("btrfs");
     command.arg("subvolume").arg("create").arg(path);
@@ -17,6 +20,8 @@ pub async fn btrfs_subvolume_create(path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Take a snapshot of the BTRFS subvolume `path` at the new folder `snapshot`. Optionally,
+/// mark the snapshot as read-only.
 pub async fn btrfs_subvolume_snapshot(path: &Path, snapshot: &Path, readonly: bool) -> Result<()> {
     let mut command = Command::new("btrfs");
     command.arg("subvolume").arg("snapshot");
@@ -32,6 +37,7 @@ pub async fn btrfs_subvolume_snapshot(path: &Path, snapshot: &Path, readonly: bo
     Ok(())
 }
 
+/// Delete a BTRFS subvolume.
 pub async fn btrfs_subvolume_delete(path: &Path) -> Result<()> {
     let mut command = Command::new("btrfs");
     command.arg("subvolume").arg("delete").arg(path);
@@ -43,10 +49,13 @@ pub async fn btrfs_subvolume_delete(path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Parsed output of the `btrfs subvolume show` command.
 pub struct BtrfsSubvolumeShow {
+    /// Current generation number of this subvolume.
     pub generation: u64,
 }
 
+/// Runs `btrfs subvolume show` and parses the output.
 pub async fn btrfs_subvolume_show(path: &Path) -> Result<BtrfsSubvolumeShow, Error> {
     lazy_static! {
         static ref GENERATION: Regex = Regex::new(r"Generation:\s+(\d+)").unwrap();
@@ -74,6 +83,7 @@ pub async fn btrfs_subvolume_show(path: &Path) -> Result<BtrfsSubvolumeShow, Err
     Ok(BtrfsSubvolumeShow { generation })
 }
 
+/// Start a BTRFS send process, returning a handle to it's standard output.
 pub async fn btrfs_send(path: &Path, parent: Option<&Path>) -> std::io::Result<Child> {
     let mut command = Command::new("btrfs");
     command.arg("send");
@@ -90,6 +100,7 @@ pub async fn btrfs_send(path: &Path, parent: Option<&Path>) -> std::io::Result<C
     command.spawn()
 }
 
+/// Start a BTRFS receive process, returning a handle to it's standard output.
 pub async fn btrfs_receive(path: &Path) -> std::io::Result<Child> {
     let mut command = Command::new("btrfs");
     command.arg("receive");
@@ -100,6 +111,9 @@ pub async fn btrfs_receive(path: &Path) -> std::io::Result<Child> {
     command.spawn()
 }
 
+/// Format a block device as a BTRFS filesystem.
+///
+/// This will overwrite the block device at `path`.
 pub async fn mkfs_btrfs(path: &Path) -> Result<()> {
     let mut command = Command::new("mkfs.btrfs");
     command.arg(path);
@@ -112,7 +126,7 @@ pub async fn mkfs_btrfs(path: &Path) -> Result<()> {
     }
 }
 
-/// Unmount path
+/// Unmount path.
 pub async fn umount(path: &Path) -> Result<()> {
     let mut command = Command::new("umount");
     command.arg(path);
@@ -125,11 +139,15 @@ pub async fn umount(path: &Path) -> Result<()> {
     }
 }
 
+/// Options for mounting a BTRFS filesystem.
 pub struct MountOptions {
+    /// Path to block device holding the filesystem.
     pub block_device: PathBuf,
+    /// Folder at which the filesystem should be mounted.
     pub mount_target: PathBuf,
 }
 
+/// Mount a BTRFS filesystem at a specified path.
 pub async fn mount_btrfs(options: MountOptions) -> Result<()> {
     let mut command = Command::new("mount");
     command
