@@ -25,6 +25,6 @@ There are no optional features.
 
 [AGPL 3.0](LICENSE.md), commercial licensing available upon request.
 
-[rustdoc]: https://fractalnetworks.gitlab.io/libraries/wireguard-keys/doc/wireguard_keys
+[rustdoc]: https://fractalnetworks.gitlab.io/libraries/brtfs-wrappers/doc/fractal_btrfs_wrappers
 [docs]: https://docs.rs/fractal-btrfs-wrappers
-[cratesio]: https://crates.io/crates/wireguard-keys
+[cratesio]: https://crates.io/crates/fractal-btrfs-wrappers
